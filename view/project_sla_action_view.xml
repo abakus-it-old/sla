@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <record id="project_sla_action_form" model="ir.ui.view">
+            <field name="name">project.sla.action.form</field>
+            <field name="model">project.sla.action</field>
+            <field name="arch" type="xml">
+                <form string="SLA action">
+                    <group>
+                        <field name="name"/>
+                        <field name="action"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</openerp>

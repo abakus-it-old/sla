@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <record id="account_analytic_account_type_tree" model="ir.ui.view">
+            <field name="name">account.analytic.account.type.tree</field>
+            <field name="model">account.analytic.account.type</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                        <field name="timesheet_product"/>
+                        <field name="sla_id"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</openerp>

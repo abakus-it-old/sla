@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+	<data>
+        <record id="project_sla_rule_form" model="ir.ui.view">
+            <field name="name">project.sla.rule.form</field>
+            <field name="model">project.sla.rule</field>
+            <field name="arch" type="xml">
+                <form string="SLA rules">
+                    <group>
+                        <field name="name"/>
+                        <field name="issue_priority"/>
+                        <field name="issue_stage"/>
+                        <field name="service_type"/>
+                        <field name="time_type"/>
+                        <field name="action_time"/>
+                        <field name="sla_action"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+        <record id="project_sla_rule_tree" model="ir.ui.view">
+            <field name="name">project.sla.rule.tree</field>
+            <field name="model">project.sla.rule</field>
+            <field name="arch" type="xml">
+                <tree string="SLA rules">
+                    <field name="name"/>
+                    <field name="issue_priority"/>
+                    <field name="issue_stage"/>
+                    <field name="service_type"/>
+                    <field name="time_type"/>
+                    <field name="action_time"/>
+                    <field name="sla_action"/>
+                </tree>
+            </field>
+        </record>
+    </data>
+</openerp>

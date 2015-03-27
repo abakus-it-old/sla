@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="1" model="project.sla.action">
+            <field name="name">Escalate</field>
+            <field name="action">\nself.pool.get('project.issue').case_escalate(cr, uid, issue.id, context)\n</field>
+        </record>
+        <record id="2" model="project.sla.action">
+            <field name="name">Send email to project manager</field>
+            <field name="action">\nif issue.project_id and issue.project_id.user_id:\n    email = isue.project_id.user_id.partner_id.email\nelse:\n    email = 'bd@abakusitsolutions.eu'\nmail_mail = self.pool.get('mail.mail')\nemail_subject = "SLA rule action"\nemail_body = 'SLA rule name: %s; Issue name: %s; Partner: %s' % (rule.name,issue.name, issue.partner_id.name)\nmail_values = {\n        'email_from': email, 'email_to': email, 'subject': email_subject, 'body_html': email_body, 'state': 'outgoing', 'type': 'email',}\nmail_id = mail_mail.create(cr, uid, mail_values, context)\nmail_mail.send(cr, uid, [mail_id], context)\n</field>
+        </record>
+    </data>
+</openerp>
