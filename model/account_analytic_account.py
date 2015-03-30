@@ -1,4 +1,4 @@
-﻿from openerp import models, fields, api
+from openerp import models, fields, api
 import datetime
 from datetime import date
 
@@ -7,6 +7,8 @@ class account_analytic_account_sla_priority(models.Model):
     
     #issue_priority_ids = fields.Many2many(comodel_name='project.issue.priority', relation='project_issue_priority_rel', column1='contract_id', column2='priority_id', string='Priorities')
     sla_id = fields.Many2one(comodel_name='project.sla',string="SLA",related='contract_type.sla_id', store=False)
+    sla_status = fields.Char(compute='_compute_sla_status',string="SLA", store=False)
+
     
     #SLA stats
     number_successful_issue = fields.Integer(compute='_compute_number_successful_issue',string="Number of successful issue", store=False)
@@ -20,6 +22,14 @@ class account_analytic_account_sla_priority(models.Model):
     issue_per_priority = fields.Char(compute='_compute_issue_per_priority',string="Issue per priority", store=False)
     issue_per_user = fields.Char(compute='_compute_issue_per_user',string="Issue per user", store=False)
 
+    @api.one
+    @api.onchange('contract_type')
+    def _compute_sla_status(self):
+        if self.contract_type and self.contract_type.sla_id:
+            self.sla_status = self.contract_type.sla_id.name
+        else:
+            self.sla_status = "NO SLA"
+    
     def _get_contract_report_dates(self):
         cr = self.env.cr
         uid = self.env.user.id
