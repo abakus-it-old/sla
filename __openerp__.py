@@ -23,5 +23,6 @@ This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, 
              'view/project_sla_action_view.xml',
              'project_sla_cron.xml',
              'project_sla_action_data.xml',
+             'security/ir.model.access.csv',
     ],
 }
