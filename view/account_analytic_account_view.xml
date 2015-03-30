@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <openerp>
 	<data>      
        <!--
@@ -20,7 +20,8 @@
             <field name="inherit_id" ref="account_analytic_account_improvements.account_analytic_account_improvements"/>
             <field name="arch" type="xml">
                 <field name="contract_type_product_name" position="after">
-                    <field name="sla_id"/>
+                    <!--<field name="sla_id"/>-->
+                    <field name="sla_status"/>
                 </field>
             </field>
         </record>
@@ -31,7 +32,7 @@
             <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
             <field name="arch" type="xml">
                 <page string="Contract Information" position="after">
-                    <page string="SLA stats" attrs="{'invisible':[('sla_id','=',False)]}">
+                    <page string="SLA stats" attrs="{'invisible':[('sla_status','=','NO SLA')]}">
                         <group>
                             <field name="number_successful_issue"/>
                             <field name="number_failed_issue"/>
