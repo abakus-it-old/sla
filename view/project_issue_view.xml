@@ -13,5 +13,29 @@
             </field>
         </record>
         -->
+        <record id="view_project_issue_sla_rules" model="ir.ui.view">
+            <field name="name">project.issue.sla.rules</field>
+            <field name="model">project.issue</field>
+			<field name="inherit_id" ref="project_issue.project_issue_form_view"/>
+            <field name="arch" type="xml">
+                <page string="Extra Info" position="after">
+                    <page string="SLA">
+                        <group>
+                            <field name="sla_status"/>
+                            <field name="sla_rule_ids" attrs="{'invisible':[('sla_status','=','NO SLA')]}">
+                                <tree string="SLA rules" create="false" edit="false" delete="false">
+                                    <field name="name"/>
+                                    <field name="issue_priority"/>
+                                    <field name="issue_stage"/>
+                                    <field name="service_type"/>
+                                    <field name="time_type"/>
+                                    <field name="action_time"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </page>
+            </field>
+        </record>
     </data>
 </openerp>
