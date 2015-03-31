@@ -1,13 +1,14 @@
-﻿from openerp import models, fields, api
+from openerp import models, fields, api
 import datetime
 from datetime import date
 from pytz import timezone
-   
 
 class project_issue_sla(models.Model):
     _inherit = ['project.issue']
 
-    #priority_sla = fields.Many2one(comodel_name='project.issue.priority', string="Issue's priority")  
+    #priority_sla = fields.Many2one(comodel_name='project.issue.priority', string="Issue's priority")
+    sla_rule_ids = fields.One2many(comodel_name='project.sla.rule',inverse_name='sla_id', related='analytic_account_id.contract_type.sla_id.sla_rule_ids', string="SLA rules", store=False)
+    sla_status = fields.Char(related='analytic_account_id.sla_status', string="SLA", store=False)
     
     def get_date_difference_with_working_time_in_minutes(self, cr, uid, create_date, check_date):
         resource_calendar_obj = self.pool.get('resource.calendar')
