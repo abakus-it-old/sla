@@ -123,4 +123,7 @@ class project_issue_sla(models.Model):
                                             if difference_in_minutes >= rule.action_time:
                                                 #execute action.action
                                                 for action in rule.sla_action:
-                                                    exec(action.action.replace(r'\n','\n'))
+                                                    try:
+                                                        exec(action.action.replace(r'\n','\n'))
+                                                    except:
+                                                        pass
