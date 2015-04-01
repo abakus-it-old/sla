@@ -7,9 +7,9 @@ class account_analytic_account_sla_priority(models.Model):
     
     #issue_priority_ids = fields.Many2many(comodel_name='project.issue.priority', relation='project_issue_priority_rel', column1='contract_id', column2='priority_id', string='Priorities')
     sla_id = fields.Many2one(comodel_name='project.sla',string="SLA",related='contract_type.sla_id', store=False)
-    sla_status = fields.Char(compute='_compute_sla_status',string="SLA", store=False)
+    sla_name = fields.Char(compute='_compute_sla_name',string="SLA name", store=False)
+    sla_bool = fields.Boolean(compute='_compute_sla_bool',string="SLA", store=False)
 
-    
     #SLA stats
     number_successful_issue = fields.Integer(compute='_compute_number_successful_issue',string="Number of successful issue", store=False)
     number_failed_issue = fields.Integer(compute='_compute_number_failed_issue',string="Number of failed issue", store=False)
@@ -28,7 +28,23 @@ class account_analytic_account_sla_priority(models.Model):
         if self.contract_type and self.contract_type.sla_id:
             self.sla_status = self.contract_type.sla_id.name
         else:
-            self.sla_status = "NO SLA"
+            self.sla_status = ""
+    
+    @api.one
+    @api.onchange('contract_type')
+    def _compute_sla_name(self):
+        if self.contract_type and self.contract_type.sla_id:
+            self.sla_name = self.contract_type.sla_id.name
+        else:
+            self.sla_name = ""
+    
+    @api.one
+    @api.onchange('contract_type')
+    def _compute_sla_bool(self):
+        if self.contract_type and self.contract_type.sla_id:
+            self.sla_bool = True
+        else:
+            self.sla_bool = False
     
     def _get_contract_report_dates(self):
         cr = self.env.cr
