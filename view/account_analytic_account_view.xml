@@ -21,7 +21,7 @@
             <field name="arch" type="xml">
                 <field name="contract_type_product_name" position="after">
                     <!--<field name="sla_id"/>-->
-                    <field name="sla_status"/>
+                    <field name="sla_bool"/>
                 </field>
             </field>
         </record>
@@ -32,7 +32,7 @@
             <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
             <field name="arch" type="xml">
                 <page string="Contract Information" position="after">
-                    <page string="SLA stats" attrs="{'invisible':[('sla_status','=','NO SLA')]}">
+                    <page string="SLA stats" attrs="{'invisible':[('sla_bool','=', False)]}">
                         <group>
                             <field name="number_successful_issue"/>
                             <field name="number_failed_issue"/>
