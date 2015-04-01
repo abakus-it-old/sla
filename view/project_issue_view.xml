@@ -21,8 +21,8 @@
                 <page string="Extra Info" position="after">
                     <page string="SLA">
                         <group>
-                            <field name="sla_status"/>
-                            <field name="sla_rule_ids" attrs="{'invisible':[('sla_status','=','NO SLA')]}">
+                            <field name="sla_bool"/>
+                            <field name="sla_rule_ids" attrs="{'invisible':[('sla_bool','=', False)]}">
                                 <tree string="SLA rules" create="false" edit="false" delete="false">
                                     <field name="name"/>
                                     <field name="issue_priority"/>
