@@ -53,11 +53,11 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_id = contract_report_obj.search(cr, uid, [('id','=',1)])
         if contract_report_id:
             contract_report = contract_report_obj.browse(cr, uid, contract_report_id[0])
-            if not contract_report.start_date or not contract_report.active:
+            if not contract_report.start_date:
                 start_date = datetime.datetime.strptime("1980-01-01", "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
             else:
                 start_date = datetime.datetime.strptime(contract_report.start_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
-            if not contract_report.end_date or not contract_report.active:
+            if not contract_report.end_date:
                 end_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             else:
                 end_date = datetime.datetime.strptime(contract_report.end_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
