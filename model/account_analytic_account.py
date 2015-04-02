@@ -66,7 +66,7 @@ class account_analytic_account_sla_priority(models.Model):
             return False
             
     def _dictionary_to_pie_chart_url(self, dict):
-        url = "https://dev.odoo.abakus.be/report/chart/pie?"
+        url = "/report/chart/pie?"
         labels = "labels="
         sizes = "sizes="
         keys = dict.keys()
