@@ -39,9 +39,10 @@
                             <field name="number_closed_issue"/>
                             <field name="percent_successful_issue"/>
                             <field name="average_reaction_time"/>
-                            <field name="average_exceeded_reaction_time"/>
+                            <!-- <field name="average_exceeded_reaction_time"/>
                             <field name="issue_per_priority"/>
                             <field name="issue_per_user"/>
+                            -->
                         </group>
                     </page>
                 </page>
