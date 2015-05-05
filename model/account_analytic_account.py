@@ -11,16 +11,20 @@ class account_analytic_account_sla_priority(models.Model):
     sla_bool = fields.Boolean(compute='_compute_sla_bool',string="SLA", store=False)
 
     #SLA stats
-    number_successful_issue = fields.Integer(compute='_compute_number_successful_issue',string="Number of successful issue", store=False)
-    number_failed_issue = fields.Integer(compute='_compute_number_failed_issue',string="Number of failed issue", store=False)
-    number_closed_issue = fields.Integer(compute='_compute_number_closed_issue',string="Number of closed issue", store=False)
-    percent_successful_issue = fields.Float(compute='_compute_percent_successful_issue',string="Percent of successful issue", store=False)
+    number_successful_issue = fields.Integer(compute='_compute_number_successful_issue',string="Number of successful issues", store=False)
+    number_failed_issue = fields.Integer(compute='_compute_number_failed_issue',string="Number of non-compliant issues", store=False)
+    number_closed_issue = fields.Integer(compute='_compute_number_closed_issue',string="Number of closed issues", store=False)
+    percent_successful_issue = fields.Float(compute='_compute_percent_successful_issue',string="Percent of successful issues", store=False)
     #in minutes
     average_reaction_time = fields.Float(compute='_compute_average_reaction_time',string="Average reaction time", store=False)
     average_exceeded_reaction_time = fields.Float(compute='_compute_average_exceeded_reaction_time',string="Average exceeded reaction time", store=False)
     #return a chart URL
     issue_per_priority = fields.Char(compute='_compute_issue_per_priority',string="Issue per priority", store=False)
     issue_per_user = fields.Char(compute='_compute_issue_per_user',string="Issue per user", store=False)
+    issue_per_result = fields.Char(compute='_compute_issue_per_result',string="Issue per result", store=False)
+    issue_per_type = fields.Char(compute='_compute_issue_per_type',string="Issue per type", store=False)
+    issue_per_stage = fields.Char(compute='_compute_issue_per_stage',string="Issue per stage", store=False)
+
 
     @api.one
     @api.onchange('contract_type')
@@ -65,23 +69,42 @@ class account_analytic_account_sla_priority(models.Model):
         else:
             return False
             
-    def _dictionary_to_pie_chart_url(self, dict):
+    def _dictionary_to_pie_chart_url(self, dict, colors=False):
         url = "/report/chart/pie?"
-        labels = "labels="
-        sizes = "sizes="
+        if dict:
+            labels = "labels="
+            sizes = "sizes="
+            keys = dict.keys()
+            last = len(keys)-1
+            count=0
+            for name in keys:
+                if count == last:
+                    labels += str(name)
+                    sizes += str(dict[name])
+                else:
+                    labels += str(name)+','
+                    sizes += str(dict[name])+','
+                count+=1
+            url = url+labels+"&"+sizes
+            if colors:
+                color_string = ""
+                last = len(colors)-1
+                count=0
+                for color in colors:
+                    if count == last:
+                        color_string += color
+                    else:
+                        color_string += color +','
+                url += "&colors="+color_string
+        return url 
+        
+    def dictionary_to_list(self, dict):
         keys = dict.keys()
         last = len(keys)-1
-        count=0
+        list = []
         for name in keys:
-            if count == last:
-                labels += str(name)
-                sizes += str(dict[name])
-            else:
-                labels += str(name)+','
-                sizes += str(dict[name])+','
-            count+=1
-        url = url+labels+"&"+sizes
-        return url 
+            list.append([name,dict[name]])
+        return list 
     
     @api.one
     def _compute_number_successful_issue(self):
@@ -175,16 +198,18 @@ class account_analytic_account_sla_priority(models.Model):
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
                 project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
-                average = 0
+                average = []
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
                         date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
                         create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
                         date_diff_in_minutes = (date_open - create_date).total_seconds()/60
                         if date_diff_in_minutes>0:
-                            average += date_diff_in_minutes
-                    average = average / len(project_issues)
-                    self.average_reaction_time = average
+                            average.append(date_diff_in_minutes)
+                        else:
+                            average.append(0)
+                    average.sort()
+                    self.average_reaction_time = average[int(len(average)/2)]
         
     @api.one
     def _compute_average_exceeded_reaction_time(self):
@@ -215,10 +240,8 @@ class account_analytic_account_sla_priority(models.Model):
                     average = total / len(project_issues)     
                     self.average_exceeded_reaction_time = average
 
-    #return a chart URL
-    @api.one
-    def _compute_issue_per_priority(self):
-        self.issue_per_priority = ""
+    def _issue_per_priority(self):
+        issue_dict = {}
         cr = self.env.cr
         uid = self.env.user.id
         contract_report_dates = self._get_contract_report_dates()
@@ -226,7 +249,6 @@ class account_analytic_account_sla_priority(models.Model):
             project_issue_obj = self.pool.get('project.issue')
             project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
-            issue_dict = {}
             priority_dict = {'0': 'Low', '1': 'Normal', '2': 'High'}
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -235,12 +257,16 @@ class account_analytic_account_sla_priority(models.Model):
                         issue_dict[priority_name] += 1
                     else:
                         issue_dict[priority_name] = 1
-            self.issue_per_priority = self._dictionary_to_pie_chart_url(issue_dict)
+        return issue_dict
     
     #return a chart URL
     @api.one
-    def _compute_issue_per_user(self):
-        self.issue_per_user = ""
+    def _compute_issue_per_priority(self):
+        dict = self._issue_per_priority()
+        self.issue_per_priority = self._dictionary_to_pie_chart_url(dict)        
+
+    def _issue_per_user(self):
+        user_dict = {}
         cr = self.env.cr
         uid = self.env.user.id
         contract_report_dates = self._get_contract_report_dates()
@@ -248,7 +274,6 @@ class account_analytic_account_sla_priority(models.Model):
             project_issue_obj = self.pool.get('project.issue')
             project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
-            user_dict = {}
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
                     if issue.user_id:
@@ -257,4 +282,92 @@ class account_analytic_account_sla_priority(models.Model):
                             user_dict[user_name] += 1
                         else:
                             user_dict[user_name] = 1
-            self.issue_per_user = self._dictionary_to_pie_chart_url(user_dict)
+        return user_dict
+   
+    #return a chart URL
+    @api.one
+    def _compute_issue_per_user(self):
+        dict = self._issue_per_user()
+        self.issue_per_user = self._dictionary_to_pie_chart_url(dict)
+    
+    def _issue_per_result(self):
+        result = {}
+        result['Successful'] = str(self.number_successful_issue)
+        result['Non-compliant'] = str(self.number_failed_issue)
+        return result
+    
+    #return a chart URL
+    @api.one
+    def _compute_issue_per_result(self):
+        dict = self._issue_per_result()
+        self.issue_per_result = self._dictionary_to_pie_chart_url(dict,['g','r'])
+        
+    def _issue_per_type_detail(self):
+        type_dict = {}
+        type_dict['OS'] = {'priceSum':0, 'timeSum':0, 'ticketSum':0, 'stuff': {}}
+        type_dict['SD'] = {'priceSum':0, 'timeSum':0, 'ticketSum':0, 'stuff': {}}
+        cr = self.env.cr
+        uid = self.env.user.id
+        contract_report_dates = self._get_contract_report_dates()
+        if contract_report_dates:
+            project_issue_obj = self.pool.get('project.issue')
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            total = 0
+            if project_issues:
+                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    if issue.timesheet_ids:
+                        for timesheet in issue.timesheet_ids:
+                            if timesheet.on_site:
+                                current_dict = type_dict['OS']
+                                computed_amount = timesheet.line_id.account_id.on_site_product.lst_price
+                            else:
+                                current_dict = type_dict['SD']
+                                computed_amount=0
+                            
+                            computed_amount=computed_amount + ((timesheet.line_id.account_id.timesheet_product_price * timesheet.line_id.unit_amount)*((100-timesheet.line_id.to_invoice.factor)/100))
+                                
+                            current_dict['priceSum']+=computed_amount
+                            current_dict['timeSum']+=timesheet.line_id.unit_amount
+                            current_dict['ticketSum']+=1
+                            
+                            user_name = timesheet.line_id.user_id.name
+                            if current_dict['stuff'].has_key(user_name):
+                                current_dict['stuff'][user_name] += 1
+                            else:
+                                current_dict['stuff'][user_name] = 1
+        return type_dict
+    
+    def _issue_per_type(self):
+        detail = self._issue_per_type_detail()
+        return {'OS': detail['OS']['ticketSum'],'SD': detail['SD']['ticketSum']}
+    
+    #return a chart URL
+    @api.one
+    def _compute_issue_per_type(self):
+        dict = self._issue_per_type()
+        self.issue_per_type= self._dictionary_to_pie_chart_url(dict)
+    
+    def _issue_per_stage(self):
+        stage_dict = {}
+        cr = self.env.cr
+        uid = self.env.user.id
+        contract_report_dates = self._get_contract_report_dates()
+        if contract_report_dates:
+            project_issue_obj = self.pool.get('project.issue')
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            total = 0
+            if project_issues:
+                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    if issue.stage_id:
+                        user_name = issue.stage_id.name
+                        if stage_dict.has_key(user_name):
+                            stage_dict[user_name] += 1
+                        else:
+                            stage_dict[user_name] = 1
+        return stage_dict
+   
+    #return a chart URL
+    @api.one
+    def _compute_issue_per_stage(self):
+        dict = self._issue_per_stage()
+        self.issue_per_stage = self._dictionary_to_pie_chart_url(dict)
