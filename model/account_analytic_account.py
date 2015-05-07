@@ -300,7 +300,8 @@ class account_analytic_account_sla_priority(models.Model):
     @api.one
     def _compute_issue_per_result(self):
         dict = self._issue_per_result()
-        self.issue_per_result = self._dictionary_to_pie_chart_url(dict,['g','r'])
+        #['g','r']
+        self.issue_per_result = self._dictionary_to_pie_chart_url(dict)
         
     def _issue_per_type_detail(self):
         type_dict = {}
