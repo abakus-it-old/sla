@@ -305,8 +305,9 @@ class account_analytic_account_sla_priority(models.Model):
         
     def _issue_per_type_detail(self):
         type_dict = {}
-        type_dict['OS'] = {'priceSum':0, 'timeSum':0, 'ticketSum':0, 'stuff': {}}
-        type_dict['SD'] = {'priceSum':0, 'timeSum':0, 'ticketSum':0, 'stuff': {}}
+        type_dict['OS'] = {'priceSum':0, 'timeSum':0, 'workLogsSum':0, 'stuff': {}}
+        type_dict['SD'] = {'priceSum':0, 'timeSum':0, 'workLogsSum':0, 'stuff': {}}
+        type_dict['ticketSum'] = 0
         cr = self.env.cr
         uid = self.env.user.id
         contract_report_dates = self._get_contract_report_dates()
@@ -329,18 +330,20 @@ class account_analytic_account_sla_priority(models.Model):
                                 
                             current_dict['priceSum']+=computed_amount
                             current_dict['timeSum']+=timesheet.line_id.unit_amount
-                            current_dict['ticketSum']+=1
+                            current_dict['workLogsSum'] += 1
                             
                             user_name = timesheet.line_id.user_id.name
                             if current_dict['stuff'].has_key(user_name):
                                 current_dict['stuff'][user_name] += 1
                             else:
                                 current_dict['stuff'][user_name] = 1
+                        if len(issue.timesheet_ids)>0:
+                            type_dict['ticketSum'] += 1
         return type_dict
     
     def _issue_per_type(self):
         detail = self._issue_per_type_detail()
-        return {'OS': detail['OS']['ticketSum'],'SD': detail['SD']['ticketSum']}
+        return {'OS': detail['OS']['workLogsSum'],'SD': detail['SD']['workLogsSum']}
     
     #return a chart URL
     @api.one

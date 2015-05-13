@@ -1,7 +1,7 @@
 ﻿{
     'name': "AbAKUS SLA",
     'version': '1.0',
-    'depends': ['account_analytic_analysis','contract_report',],
+    'depends': ['account_analytic_analysis',],#'contract_report'
     'author': "Bernard DELHEZ, AbAKUS it-solutions SARL",
     'website': "http://www.abakusitsolutions.eu",
     'category': 'Contract',
