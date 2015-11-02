@@ -1,6 +1,7 @@
 from openerp import models, fields, api
 import datetime
 from datetime import date
+from pytz import timezone
 
 class account_analytic_account_sla_priority(models.Model):
     _inherit = ['account.analytic.account']
@@ -122,16 +123,11 @@ class account_analytic_account_sla_priority(models.Model):
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
                         #Works only with reaction time
-                        date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
-                        create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
-                        date_diff_in_minutes = (date_open - create_date).total_seconds()*60                   
-                        check = False
-                        for rule in issue.analytic_account_id.contract_type.sla_id.sla_rule_ids:
-                            if check:
-                                break
-                            if date_diff_in_minutes < rule.action_time:
-                                total += 1
-                                check = True
+                        local_tz = timezone('Europe/Brussels')
+                        date_open = local_tz.localize(datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S'))
+                        create_date = local_tz.localize(datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S'))
+                        if project_issue_obj.is_issue_SLA_compliant(cr,uid,issue.id,create_date,date_open):
+                            total += 1
                 self.number_successful_issue = total
 
     @api.one
@@ -150,16 +146,11 @@ class account_analytic_account_sla_priority(models.Model):
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
                         #Works only with reaction time
-                        date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
-                        create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
-                        date_diff_in_minutes = (date_open - create_date).total_seconds()/60                   
-                        check = False
-                        for rule in issue.analytic_account_id.contract_type.sla_id.sla_rule_ids:
-                            if check:
-                                break
-                            if date_diff_in_minutes >= rule.action_time:
-                                total += 1
-                                check = True
+                        local_tz = timezone('Europe/Brussels')
+                        date_open = local_tz.localize(datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S'))
+                        create_date = local_tz.localize(datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S'))
+                        if not project_issue_obj.is_issue_SLA_compliant(cr,uid,issue.id,create_date,date_open):
+                            total += 1
                 self.number_failed_issue = total
 
     @api.one
@@ -180,9 +171,10 @@ class account_analytic_account_sla_priority(models.Model):
     
     @api.one
     def _compute_percent_successful_issue(self):
-        sum = self.number_successful_issue+self.number_failed_issue
+        number_successful_issue = self.number_successful_issue
+        sum = number_successful_issue+self.number_failed_issue
         if sum > 0:
-            self.percent_successful_issue = self.number_successful_issue / sum *100
+            self.percent_successful_issue = number_successful_issue*100 / sum
         else:
             self.percent_successful_issue = 0
     
