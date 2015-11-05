@@ -111,7 +111,31 @@ class project_issue_sla(models.Model):
                             difference_in_minutes = self.get_date_difference_with_working_time_in_minutes(cr, uid, start_date, end_date)
                             if difference_in_minutes <= rule.action_time:
                                 return True
-        return False    
+        return False
+
+    def execute_rule_if_issue_is_SLA_non_compliant(self, cr, uid, issue_id , start_date, end_date):
+        issue_ids = self.pool.get('project.issue').search(cr, uid, [('id','=',issue_id)])
+        if issue_ids:
+            issue = self.pool.get('project.issue').browse(cr, uid, issue_ids[0])
+            #check if SLA exists on contract.
+            if issue.project_id and issue.project_id.analytic_account_id and issue.project_id.analytic_account_id.contract_type and issue.project_id.analytic_account_id.contract_type.sla_id:
+                #loop SLA rules
+                for rule in issue.project_id.analytic_account_id.contract_type.sla_id.sla_rule_ids:
+                    #check the issue's priority and issue's stage
+                    if rule.issue_priority == issue.priority:
+                        service_type = 'sd'
+                        for timesheet in issue.timesheet_ids:
+                            if timesheet.on_site:
+                                service_type = 'os'
+                                break
+                        if rule.service_type == service_type:
+                            difference_in_minutes = self.get_date_difference_with_working_time_in_minutes(cr, uid, start_date, end_date)
+                            if difference_in_minutes >= rule.action_time:
+                                for action in rule.sla_action:
+                                    try:
+                                        exec(action.action.replace(r'\n','\n'))
+                                    except:
+                                        pass
     
     
     def _cron_project_sla(self, cr, uid, context=None):
@@ -138,10 +162,4 @@ class project_issue_sla(models.Model):
                                 now = datetime.datetime.now(local_tz)
                                 date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
                                 create_date = local_tz.localize(date, is_dst=None)
-                                if not self.is_issue_SLA_compliant(cr,uid,issue.id,create_date,now):
-                                    #execute action.action
-                                    for action in rule.sla_action:
-                                        try:
-                                            exec(action.action.replace(r'\n','\n'))
-                                        except:
-                                            pass
+                                self.execute_rule_if_issue_is_SLA_non_compliant(cr,uid,issue.id,create_date,now)                                   
