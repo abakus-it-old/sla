@@ -13,6 +13,8 @@
     - The cron also checks the time difference between the create date and now with the working hours.
     - The working hour needs to be called "SLA". Two times the same day in working hour is not allowed.
     
+    SLA Cron is also corrected because it needs to be taken into account for OS and SD which does not have the same SLA data.
+    
 This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, under the control of Valentin Thirion.""",
     'data': ['view/account_analytic_account_view.xml',
              'view/account_analytic_account_type_view.xml',
