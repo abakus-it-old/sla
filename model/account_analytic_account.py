@@ -122,7 +122,7 @@ class account_analytic_account_sla_priority(models.Model):
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
-                        if not issue.date_open:
+                        if issue.date_open == None:
                             continue
                         #Works only with reaction time
                         local_tz = timezone('Europe/Brussels')
