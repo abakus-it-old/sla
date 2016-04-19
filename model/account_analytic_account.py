@@ -147,6 +147,8 @@ class account_analytic_account_sla_priority(models.Model):
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
+                        if issue.date_open == False:
+                            continue
                         #Works only with reaction time
                         local_tz = timezone('Europe/Brussels')
                         date_open = local_tz.localize(datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S'))
@@ -195,6 +197,8 @@ class account_analytic_account_sla_priority(models.Model):
                 average = []
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
+                        if issue.date_open == False:
+                            continue
                         date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
                         create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
                         date_diff_in_minutes = (date_open - create_date).total_seconds()/60
