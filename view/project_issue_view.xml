@@ -13,7 +13,7 @@
             </field>
         </record>
         -->
-        <record id="view_project_issue_sla_rules" model="ir.ui.view">
+        <record id="view_project_issue_sla_rules_1" model="ir.ui.view">
             <field name="name">project.issue.sla.rules</field>
             <field name="model">project.issue</field>
 			<field name="inherit_id" ref="project_issue.project_issue_form_view"/>
@@ -32,6 +32,7 @@
                                     <field name="action_time"/>
                                 </tree>
                             </field>
+                            <field name="sla_compliant" />
                         </group>
                     </page>
                 </page>

@@ -9,6 +9,7 @@ class project_issue_sla(models.Model):
     #priority_sla = fields.Many2one(comodel_name='project.issue.priority', string="Issue's priority")
     sla_rule_ids = fields.One2many(comodel_name='project.sla.rule',inverse_name='sla_id', related='analytic_account_id.contract_type.sla_id.sla_rule_ids', string="SLA rules", store=False)
     sla_bool = fields.Boolean(related='analytic_account_id.sla_bool', string="SLA", store=False)
+    sla_compliant = fields.Boolean(compute="_is_SLA_compliant", string="SLA compliant")
     
     def get_date_difference_with_working_time_in_minutes(self, cr, uid, create_date, check_date):
         resource_calendar_obj = self.pool.get('resource.calendar')
@@ -89,6 +90,15 @@ class project_issue_sla(models.Model):
  
         return False
 
+    @api.one
+    def _is_SLA_compliant(self):
+        if self.date_open == False:
+            return False
+
+        local_tz = timezone('Europe/Brussels')
+        date_open = local_tz.localize(datetime.datetime.strptime(self.date_open, '%Y-%m-%d %H:%M:%S'))
+        create_date = local_tz.localize(datetime.datetime.strptime(self.create_date, '%Y-%m-%d %H:%M:%S'))
+        return self.pool.get('project.issue').is_issue_SLA_compliant(self.env.cr, self.env.user.id, self.id, create_date, date_open)
         
         
     #dates needs to be in timezone('Europe/Brussels')
