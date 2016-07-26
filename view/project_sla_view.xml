@@ -14,12 +14,15 @@
                 </form>
             </field>
         </record>
+
         <record model="ir.actions.act_window" id="project_sla_action">
             <field name="name">SLA</field>
             <field name="res_model">project.sla</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
-        <menuitem id="project_sla_menu" name="SLA" parent="base.menu_base_config" action="project_sla_action"/>
+
+        <menuitem id="project_sla_main_menu" name="Service Level Agreement" parent="project.menu_project_config" action=""/>
+        <menuitem id="project_sla_menu" name="SLA" parent="sla.project_sla_main_menu" action="project_sla_action"/>
     </data>
 </openerp>

@@ -33,5 +33,14 @@
                 </tree>
             </field>
         </record>
+
+        <record model="ir.actions.act_window" id="project_rules_action">
+            <field name="name">SLA Rules</field>
+            <field name="res_model">project.sla.rule</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="project_rule_menu" name="Rules" parent="sla.project_sla_main_menu" action="project_rules_action"/>
     </data>
 </openerp>

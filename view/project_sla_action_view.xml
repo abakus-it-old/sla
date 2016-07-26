@@ -13,5 +13,14 @@
                 </form>
             </field>
         </record>
+
+        <record model="ir.actions.act_window" id="project_actions_action">
+            <field name="name">SLA Actions</field>
+            <field name="res_model">project.sla.action</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="project_actions_menu" name="Actions" parent="sla.project_sla_main_menu" action="project_actions_action"/>
     </data>
 </openerp>
