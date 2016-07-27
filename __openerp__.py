@@ -3,8 +3,9 @@
     'version': '1.0',
     'depends': [
         'project',
-        'analytic',
-    ],#'contract_report'
+        'account_analytic_account_improvements',
+        'contract_timesheet_activities_on_site_management',
+    ],
     'author': "Bernard DELHEZ, AbAKUS it-solutions SARL",
     'website': "http://www.abakusitsolutions.eu",
     'category': 'Contract',
@@ -26,8 +27,8 @@ This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, 
         'view/project_sla_rule_view.xml',
         'view/project_sla_action_view.xml',
         'project_sla_action_data.xml',
-        #'view/account_analytic_account_view.xml',
-        #'view/account_analytic_account_type_view.xml',
+        'view/account_analytic_account_view.xml',
+        'view/account_analytic_account_type_view.xml',
 
         #'view/project_issue_view.xml',
         ###'view/project_issue_priority_view.xml',

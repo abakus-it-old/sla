@@ -4,7 +4,7 @@ from datetime import date
 from pytz import timezone
 
 class account_analytic_account_sla_priority(models.Model):
-    _inherit = ['account.analytic.account']
+    _inherit = ['sale.subscription']
     
     #issue_priority_ids = fields.Many2many(comodel_name='project.issue.priority', relation='project_issue_priority_rel', column1='contract_id', column2='priority_id', string='Priorities')
     sla_id = fields.Many2one(comodel_name='project.sla',string="SLA",related='contract_type.sla_id', store=False)
@@ -25,7 +25,6 @@ class account_analytic_account_sla_priority(models.Model):
     issue_per_result = fields.Char(compute='_compute_issue_per_result',string="Issue per result", store=False)
     issue_per_type = fields.Char(compute='_compute_issue_per_type',string="Issue per type", store=False)
     issue_per_stage = fields.Char(compute='_compute_issue_per_stage',string="Issue per stage", store=False)
-
 
     @api.one
     @api.onchange('contract_type')
