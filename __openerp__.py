@@ -29,12 +29,8 @@ This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, 
         'project_sla_action_data.xml',
         'view/account_analytic_account_view.xml',
         'view/account_analytic_account_type_view.xml',
-
-        #'view/project_issue_view.xml',
-        ###'view/project_issue_priority_view.xml',
-
-        #'project_sla_cron.xml',
-
-        #'security/ir.model.access.csv',
+        'view/project_issue_view.xml',
+        'project_sla_cron.xml',
+        'security/ir.model.access.csv',
     ],
 }

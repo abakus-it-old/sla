@@ -1,24 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>   
-        <!--
-        <record id="view_project_issue_priority_sla" model="ir.ui.view">
-            <field name="name">project.issue.priority.sla</field>
-            <field name="model">project.issue</field>
-			<field name="inherit_id" ref="project_issue.project_issue_form_view"/>
-            <field name="arch" type="xml">
-                <field name="priority" position="after">
-                    <field name="priority_sla" widget="selection" domain="[('contract_ids','=','analytic_account_id')]"/>
-                </field>
-            </field>
-        </record>
-        -->
         <record id="view_project_issue_sla_rules_1" model="ir.ui.view">
             <field name="name">project.issue.sla.rules</field>
             <field name="model">project.issue</field>
 			<field name="inherit_id" ref="project_issue.project_issue_form_view"/>
             <field name="arch" type="xml">
-                <page string="Extra Info" position="after">
+                <xpath expr="//notebook[last()]">
                     <page string="SLA">
                         <group>
                             <field name="sla_bool"/>
@@ -35,7 +23,7 @@
                             <field name="sla_compliant" />
                         </group>
                     </page>
-                </page>
+                </xpath>
             </field>
         </record>
     </data>

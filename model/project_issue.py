@@ -7,8 +7,8 @@ class project_issue_sla(models.Model):
     _inherit = ['project.issue']
 
     #priority_sla = fields.Many2one(comodel_name='project.issue.priority', string="Issue's priority")
-    sla_rule_ids = fields.One2many(comodel_name='project.sla.rule',inverse_name='sla_id', related='analytic_account_id.contract_type.sla_id.sla_rule_ids', string="SLA rules", store=False)
-    sla_bool = fields.Boolean(related='analytic_account_id.sla_bool', string="SLA", store=False)
+    sla_rule_ids = fields.One2many(comodel_name='project.sla.rule',inverse_name='sla_id', related='project_id.sale_subscription_id.contract_type.sla_id.sla_rule_ids', string="SLA rules", store=False)
+    sla_bool = fields.Boolean(related='project_id.sale_subscription_id.sla_bool', string="SLA", store=False)
     sla_compliant = fields.Boolean(compute="_is_SLA_compliant", string="SLA compliant")
     
     def get_date_difference_with_working_time_in_minutes(self, cr, uid, create_date, check_date):
@@ -107,9 +107,9 @@ class project_issue_sla(models.Model):
         if issue_ids:
             issue = self.pool.get('project.issue').browse(cr, uid, issue_ids[0])
             #check if SLA exists on contract.
-            if issue.project_id and issue.project_id.analytic_account_id and issue.project_id.analytic_account_id.contract_type and issue.project_id.analytic_account_id.contract_type.sla_id:
+            if issue.project_id and issue.project_id.sale_subscription_id and issue.project_id.sale_subscription_id.contract_type and issue.project_id.sale_subscription_id.contract_type.sla_id:
                 #loop SLA rules
-                for rule in issue.project_id.analytic_account_id.contract_type.sla_id.sla_rule_ids:
+                for rule in issue.project_id.sale_subscription_id.contract_type.sla_id.sla_rule_ids:
                     #check the issue's priority and issue's stage
                     if rule.issue_priority == issue.priority:
                         service_type = 'sd'
@@ -128,9 +128,9 @@ class project_issue_sla(models.Model):
         if issue_ids:
             issue = self.pool.get('project.issue').browse(cr, uid, issue_ids[0])
             #check if SLA exists on contract.
-            if issue.project_id and issue.project_id.analytic_account_id and issue.project_id.analytic_account_id.contract_type and issue.project_id.analytic_account_id.contract_type.sla_id:
+            if issue.project_id and issue.project_id.sale_subscription_id and issue.project_id.sale_subscription_id.contract_type and issue.project_id.sale_subscription_id.contract_type.sla_id:
                 #loop SLA rules
-                for rule in issue.project_id.analytic_account_id.contract_type.sla_id.sla_rule_ids:
+                for rule in issue.project_id.sale_subscription_id.contract_type.sla_id.sla_rule_ids:
                     #check the issue's priority and issue's stage
                     if rule.issue_priority == issue.priority:
                         service_type = 'sd'
