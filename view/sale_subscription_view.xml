@@ -2,7 +2,7 @@
 <openerp>
 	<data>
         <record model="ir.ui.view" id="view_sale_subscription_sla">
-           <field name="name">account_analytic_account_sla</field>
+           <field name="name">sale_subscription_sla</field>
             <field name="model">sale.subscription</field>
             <field name="inherit_id" ref="account_analytic_account_improvements.sale_subscription_contract_improvements"/>
             <field name="arch" type="xml">
