@@ -1,10 +1,11 @@
 ﻿{
     'name': "AbAKUS Project SLA",
-    'version': '1.0',
+    'version': '9.0.1.0',
     'depends': [
         'project',
         'account_analytic_account_improvements',
         'contract_timesheet_activities_on_site_management',
+        'contract_report'
     ],
     'author': "Bernard DELHEZ, AbAKUS it-solutions SARL",
     'website': "http://www.abakusitsolutions.eu",
@@ -18,9 +19,13 @@ This modules adds the SLA management for AbAKUS.
     - It adds one cron that is active every 5 minutes. It checks if a issue from a contract is over the action time from the SLA rule.
     - The cron also checks the time difference between the create date and now with the working hours.
     - The working hour needs to be called "SLA". Two times the same day in working hour is not allowed.
+    - Uses the start and end date from contract_report to filter the SLA stats
     
     SLA Cron is also corrected because it needs to be taken into account for OS and SD which does not have the same SLA data.
-    
+
+odoo 9 Updates:
+    - Remove escalate action because of no escalate in odoo 9
+
 This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, under the control of Valentin Thirion.""",
     'data': [
         'view/project_sla_view.xml',

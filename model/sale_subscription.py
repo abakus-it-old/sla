@@ -1,12 +1,10 @@
 from openerp import models, fields, api
 import datetime
-from datetime import date
 from pytz import timezone
 
 class account_analytic_account_sla_priority(models.Model):
     _inherit = ['sale.subscription']
-    
-    #issue_priority_ids = fields.Many2many(comodel_name='project.issue.priority', relation='project_issue_priority_rel', column1='contract_id', column2='priority_id', string='Priorities')
+
     sla_id = fields.Many2one(comodel_name='project.sla',string="SLA",related='contract_type.sla_id', store=False)
     sla_name = fields.Char(compute='_compute_sla_name',string="SLA name", store=False)
     sla_bool = fields.Boolean(compute='_compute_sla_bool',string="SLA", store=False)
@@ -33,7 +31,7 @@ class account_analytic_account_sla_priority(models.Model):
             self.sla_status = self.contract_type.sla_id.name
         else:
             self.sla_status = ""
-    
+
     @api.one
     @api.onchange('contract_type')
     def _compute_sla_name(self):
@@ -41,7 +39,7 @@ class account_analytic_account_sla_priority(models.Model):
             self.sla_name = self.contract_type.sla_id.name
         else:
             self.sla_name = ""
-    
+
     @api.one
     @api.onchange('contract_type')
     def _compute_sla_bool(self):
@@ -49,7 +47,7 @@ class account_analytic_account_sla_priority(models.Model):
             self.sla_bool = True
         else:
             self.sla_bool = False
-    
+
     def _get_contract_report_dates(self):
         cr = self.env.cr
         uid = self.env.user.id
@@ -68,7 +66,7 @@ class account_analytic_account_sla_priority(models.Model):
             return [start_date,end_date]
         else:
             return False
-            
+
     def _dictionary_to_pie_chart_url(self, dict, colors=False):
         url = "/report/chart/pie?"
         if dict:
@@ -96,16 +94,16 @@ class account_analytic_account_sla_priority(models.Model):
                     else:
                         color_string += color +','
                 url += "&colors="+color_string
-        return url 
-        
+        return url
+
     def dictionary_to_list(self, dict):
         keys = dict.keys()
         last = len(keys)-1
         list = []
         for name in keys:
             list.append([name,dict[name]])
-        return list 
-    
+        return list
+
     @api.one
     def _compute_number_successful_issue(self):
         self.number_successful_issue = 0
@@ -117,7 +115,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -142,7 +140,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -168,10 +166,10 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_cancelled = project_task_type_obj.search(cr, uid, [('name','=','Cancelled')])
             if project_task_type_closed and project_task_type_cancelled:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','in',(project_task_type_closed[0],project_task_type_cancelled[0]))])
+                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','in',(project_task_type_closed[0],project_task_type_cancelled[0]))])
                 if project_issues:
                     self.number_closed_issue = len(project_issues)
-    
+
     @api.one
     def _compute_percent_successful_issue(self):
         number_successful_issue = self.number_successful_issue
@@ -180,7 +178,7 @@ class account_analytic_account_sla_priority(models.Model):
             self.percent_successful_issue = number_successful_issue*100 / sum
         else:
             self.percent_successful_issue = 0
-    
+
     @api.one
     def _compute_average_reaction_time(self):
         self.average_reaction_time = 0
@@ -192,7 +190,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 average = []
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -207,7 +205,7 @@ class account_analytic_account_sla_priority(models.Model):
                             average.append(0)
                     average.sort()
                     self.average_reaction_time = average[int(len(average)/2)]
-        
+
     @api.one
     def _compute_average_exceeded_reaction_time(self):
         self.average_exceeded_reaction_time = 0
@@ -219,14 +217,14 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
                         #Works only with reaction time
                         date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
                         create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
-                        date_diff_in_minutes = (date_open - create_date).total_seconds()/60                   
+                        date_diff_in_minutes = (date_open - create_date).total_seconds()/60
                         check = False
                         for rule in issue.analytic_account_id.contract_type.sla_id.sla_rule_ids:
                             if check:
@@ -234,7 +232,7 @@ class account_analytic_account_sla_priority(models.Model):
                             if date_diff_in_minutes >= rule.action_time:
                                 total += date_diff_in_minutes
                                 check = True
-                    average = total / len(project_issues)     
+                    average = total / len(project_issues)
                     self.average_exceeded_reaction_time = average
 
     def _issue_per_priority(self):
@@ -244,7 +242,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             priority_dict = {'0': 'Low', '1': 'Normal', '2': 'High'}
             if project_issues:
@@ -255,12 +253,12 @@ class account_analytic_account_sla_priority(models.Model):
                     else:
                         issue_dict[priority_name] = 1
         return issue_dict
-    
+
     #return a chart URL
     @api.one
     def _compute_issue_per_priority(self):
         dict = self._issue_per_priority()
-        self.issue_per_priority = self._dictionary_to_pie_chart_url(dict)        
+        self.issue_per_priority = self._dictionary_to_pie_chart_url(dict)
 
     def _issue_per_user(self):
         user_dict = {}
@@ -269,7 +267,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -280,26 +278,26 @@ class account_analytic_account_sla_priority(models.Model):
                         else:
                             user_dict[user_name] = 1
         return user_dict
-   
+
     #return a chart URL
     @api.one
     def _compute_issue_per_user(self):
         dict = self._issue_per_user()
         self.issue_per_user = self._dictionary_to_pie_chart_url(dict)
-    
+
     def _issue_per_result(self):
         result = {}
         result['Successful'] = str(self.number_successful_issue)
         result['Non-compliant'] = str(self.number_failed_issue)
         return result
-    
+
     #return a chart URL
     @api.one
     def _compute_issue_per_result(self):
         dict = self._issue_per_result()
         #['g','r']
         self.issue_per_result = self._dictionary_to_pie_chart_url(dict)
-        
+
     def _issue_per_type_detail(self):
         type_dict = {}
         type_dict['OS'] = {'priceSum':0, 'timeSum':0, 'workLogsSum':0, 'stuff': {}}
@@ -310,26 +308,26 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
                     if issue.timesheet_ids:
-                        for timesheet in issue.timesheet_ids:
-                            if timesheet.on_site:
+                        for line_id in issue.timesheet_ids:
+                            if line_id.on_site:
                                 current_dict = type_dict['OS']
-                                computed_amount = timesheet.line_id.account_id.on_site_product.lst_price
+                                computed_amount = line_id.sale_subscription_id.on_site_product.lst_price
                             else:
                                 current_dict = type_dict['SD']
                                 computed_amount=0
-                            
-                            computed_amount=computed_amount + ((timesheet.line_id.account_id.timesheet_product_price * timesheet.line_id.unit_amount)*((100-timesheet.line_id.to_invoice.factor)/100))
-                                
+
+                            computed_amount=computed_amount + ((line_id.sale_subscription_id.timesheet_product_price * line_id.unit_amount)*((100-line_id.to_invoice.factor)/100))
+
                             current_dict['priceSum']+=computed_amount
-                            current_dict['timeSum']+=timesheet.line_id.unit_amount
+                            current_dict['timeSum']+=line_id.unit_amount
                             current_dict['workLogsSum'] += 1
-                            
-                            user_name = timesheet.line_id.user_id.name
+
+                            user_name = line_id.user_id.name
                             if current_dict['stuff'].has_key(user_name):
                                 current_dict['stuff'][user_name] += 1
                             else:
@@ -337,17 +335,17 @@ class account_analytic_account_sla_priority(models.Model):
                         if len(issue.timesheet_ids)>0:
                             type_dict['ticketSum'] += 1
         return type_dict
-    
+
     def _issue_per_type(self):
         detail = self._issue_per_type_detail()
         return {'OS': detail['OS']['workLogsSum'],'SD': detail['SD']['workLogsSum']}
-    
+
     #return a chart URL
     @api.one
     def _compute_issue_per_type(self):
         dict = self._issue_per_type()
         self.issue_per_type= self._dictionary_to_pie_chart_url(dict)
-    
+
     def _issue_per_stage(self):
         stage_dict = {}
         cr = self.env.cr
@@ -355,7 +353,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -366,7 +364,7 @@ class account_analytic_account_sla_priority(models.Model):
                         else:
                             stage_dict[user_name] = 1
         return stage_dict
-   
+
     #return a chart URL
     @api.one
     def _compute_issue_per_stage(self):

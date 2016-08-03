@@ -4,7 +4,7 @@
         <record id="account_analytic_account_type_tree_sla" model="ir.ui.view">
             <field name="name">account.analytic.account.type.form.sla</field>
             <field name="inherit_id" ref="account_analytic_account_improvements.account_analytic_account_type_form_view"/>
-            <field name="model">sale.subscription.type</field>
+            <field name="model">account.analytic.account.type</field>
             <field name="arch" type="xml">
                 <field name="contractual_minimum_amount" position="after">
                     <field name="sla_id"/>
