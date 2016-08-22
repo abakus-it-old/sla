@@ -115,7 +115,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -140,7 +140,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -166,7 +166,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_cancelled = project_task_type_obj.search(cr, uid, [('name','=','Cancelled')])
             if project_task_type_closed and project_task_type_cancelled:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','in',(project_task_type_closed[0],project_task_type_cancelled[0]))])
+                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','in',(project_task_type_closed[0],project_task_type_cancelled[0]))])
                 if project_issues:
                     self.number_closed_issue = len(project_issues)
 
@@ -190,7 +190,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 average = []
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -217,7 +217,7 @@ class account_analytic_account_sla_priority(models.Model):
             project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
             if project_task_type_unassigned:
                 project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
                 total = 0
                 if project_issues:
                     for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -242,7 +242,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             priority_dict = {'0': 'Low', '1': 'Normal', '2': 'High'}
             if project_issues:
@@ -267,7 +267,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -308,7 +308,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
@@ -353,7 +353,7 @@ class account_analytic_account_sla_priority(models.Model):
         contract_report_dates = self._get_contract_report_dates()
         if contract_report_dates:
             project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('sale_subscription_id', '=', self.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
             total = 0
             if project_issues:
                 for issue in project_issue_obj.browse(cr, uid, project_issues):
