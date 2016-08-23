@@ -4,7 +4,6 @@
     'depends': [
         'project',
         'account_analytic_account_improvements',
-        'contract_timesheet_activities_on_site_management',
         'contract_report'
     ],
     'author': "Bernard DELHEZ, AbAKUS it-solutions SARL",
