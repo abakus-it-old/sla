@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 from openerp import models, fields, api
 import datetime
 from pytz import timezone
 
-class account_analytic_account_sla_priority(models.Model):
-    _inherit = ['sale.subscription']
+class sale_subscription_sla_priority(models.Model):
+    _inherit = 'sale.subscription'
 
     sla_id = fields.Many2one(comodel_name='project.sla',string="SLA",related='contract_type.sla_id', store=False)
     sla_name = fields.Char(compute='_compute_sla_name',string="SLA name", store=False)
@@ -47,25 +49,19 @@ class account_analytic_account_sla_priority(models.Model):
             self.sla_bool = True
         else:
             self.sla_bool = False
-
-    def _get_contract_report_dates(self):
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_obj = self.pool.get('contract.report')
-        contract_report_id = contract_report_obj.search(cr, uid, [('id','=',1)])
-        if contract_report_id:
-            contract_report = contract_report_obj.browse(cr, uid, contract_report_id[0])
-            if not contract_report.start_date:
-                start_date = datetime.datetime.strptime("1980-01-01", "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                start_date = datetime.datetime.strptime(contract_report.start_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
-            if not contract_report.end_date:
-                end_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-            else:
-                end_date = datetime.datetime.strptime(contract_report.end_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
-            return [start_date,end_date]
+    
+    @api.model
+    def _get_sale_subscription_shared_dates(self):
+        sale_subscription_shared = self.env['sale.subscription.shared'].get_instance()
+        if not sale_subscription_shared.start_date:
+            start_date = datetime.datetime.strptime("1980-01-01", "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
         else:
-            return False
+            start_date = datetime.datetime.strptime(sale_subscription_shared.start_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
+        if not sale_subscription_shared.end_date:
+            end_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            end_date = datetime.datetime.strptime(sale_subscription_shared.end_date, "%Y-%m-%d").date().strftime("%Y-%m-%d %H:%M:%S")
+        return [start_date,end_date]
 
     def _dictionary_to_pie_chart_url(self, dict, colors=False):
         url = "/report/chart/pie?"
@@ -107,66 +103,56 @@ class account_analytic_account_sla_priority(models.Model):
     @api.one
     def _compute_number_successful_issue(self):
         self.number_successful_issue = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_task_type_obj = self.pool.get('project.task.type')
-            project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_task_type_unassigned = self.env['project.task.type'].search([('name','=','Unassigned')], limit=1)
             if project_task_type_unassigned:
-                project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issue_env = self.env['project.issue']
+                project_issues = project_issue_env.search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1]),('stage_id','!=', project_task_type_unassigned.id)])
                 total = 0
                 if project_issues:
-                    for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    for issue in project_issues:
                         if issue.date_open == False:
                             continue
                         #Works only with reaction time
                         local_tz = timezone('Europe/Brussels')
                         date_open = local_tz.localize(datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S'))
                         create_date = local_tz.localize(datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S'))
-                        if project_issue_obj.is_issue_SLA_compliant(cr,uid,issue.id,create_date,date_open):
+                        if project_issue_env.is_issue_SLA_compliant(issue.id, create_date, date_open):
                             total += 1
                 self.number_successful_issue = total
 
     @api.one
     def _compute_number_failed_issue(self):
         self.number_failed_issue = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_task_type_obj = self.pool.get('project.task.type')
-            project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_task_type_unassigned = self.env['project.task.type'].search([('name','=','Unassigned')], limit=1)
             if project_task_type_unassigned:
-                project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issue_env = self.env['project.issue']
+                project_issues = project_issue_env.search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1]),('stage_id','!=',project_task_type_unassigned.id)])
                 total = 0
                 if project_issues:
-                    for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    for issue in project_issues:
                         if issue.date_open == False:
                             continue
                         #Works only with reaction time
                         local_tz = timezone('Europe/Brussels')
                         date_open = local_tz.localize(datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S'))
                         create_date = local_tz.localize(datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S'))
-                        if not project_issue_obj.is_issue_SLA_compliant(cr,uid,issue.id,create_date,date_open):
+                        if not project_issue_env.is_issue_SLA_compliant(issue.id, create_date, date_open):
                             total += 1
                 self.number_failed_issue = total
 
     @api.one
     def _compute_number_closed_issue(self):
         self.number_closed_issue = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_task_type_obj = self.pool.get('project.task.type')
-            project_task_type_closed = project_task_type_obj.search(cr, uid, [('name','=','Closed')])
-            project_task_type_cancelled = project_task_type_obj.search(cr, uid, [('name','=','Cancelled')])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_task_type_closed = self.env['project.task.type'].search([('name','=','Closed')], limit=1)
+            project_task_type_cancelled = self.env['project.task.type'].search([('name','=','Cancelled')], limit=1)
             if project_task_type_closed and project_task_type_cancelled:
-                project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','in',(project_task_type_closed[0],project_task_type_cancelled[0]))])
+                project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1]),('stage_id','in',(project_task_type_closed.id,project_task_type_cancelled.id))])
                 if project_issues:
                     self.number_closed_issue = len(project_issues)
 
@@ -182,18 +168,14 @@ class account_analytic_account_sla_priority(models.Model):
     @api.one
     def _compute_average_reaction_time(self):
         self.average_reaction_time = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_task_type_obj = self.pool.get('project.task.type')
-            project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_task_type_unassigned = self.env['project.task.type'].search([('name','=','Unassigned')], limit=1)
             if project_task_type_unassigned:
-                project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1]),('stage_id','!=',project_task_type_unassigned.id)])
                 average = []
                 if project_issues:
-                    for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    for issue in project_issues:
                         if issue.date_open == False:
                             continue
                         date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
@@ -209,18 +191,14 @@ class account_analytic_account_sla_priority(models.Model):
     @api.one
     def _compute_average_exceeded_reaction_time(self):
         self.average_exceeded_reaction_time = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_task_type_obj = self.pool.get('project.task.type')
-            project_task_type_unassigned = project_task_type_obj.search(cr, uid, [('name','=','Unassigned')])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_task_type_unassigned = self.env['project.task.type'].search([('name','=','Unassigned')], limit=1)
             if project_task_type_unassigned:
-                project_issue_obj = self.pool.get('project.issue')
-                project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1]),('stage_id','!=',project_task_type_unassigned[0])])
+                project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1]),('stage_id','!=',project_task_type_unassigned.id)])
                 total = 0
                 if project_issues:
-                    for issue in project_issue_obj.browse(cr, uid, project_issues):
+                    for issue in project_issues:
                         #Works only with reaction time
                         date_open = datetime.datetime.strptime(issue.date_open, '%Y-%m-%d %H:%M:%S')
                         create_date = datetime.datetime.strptime(issue.create_date, '%Y-%m-%d %H:%M:%S')
@@ -237,16 +215,13 @@ class account_analytic_account_sla_priority(models.Model):
 
     def _issue_per_priority(self):
         issue_dict = {}
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1])])
             total = 0
             priority_dict = {'0': 'Low', '1': 'Normal', '2': 'High'}
             if project_issues:
-                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                for issue in project_issues:
                     priority_name = priority_dict[str(issue.priority)]
                     if issue_dict.has_key(priority_name):
                         issue_dict[priority_name] += 1
@@ -262,15 +237,12 @@ class account_analytic_account_sla_priority(models.Model):
 
     def _issue_per_user(self):
         user_dict = {}
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1])])
             total = 0
             if project_issues:
-                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                for issue in project_issues:
                     if issue.user_id:
                         user_name = issue.user_id.name
                         if user_dict.has_key(user_name):
@@ -303,15 +275,12 @@ class account_analytic_account_sla_priority(models.Model):
         type_dict['OS'] = {'priceSum':0, 'timeSum':0, 'workLogsSum':0, 'stuff': {}}
         type_dict['SD'] = {'priceSum':0, 'timeSum':0, 'workLogsSum':0, 'stuff': {}}
         type_dict['ticketSum'] = 0
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_issues = self.env['project.issue'].search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1])])
             total = 0
             if project_issues:
-                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                for issue in project_issues:
                     if issue.timesheet_ids:
                         for line_id in issue.timesheet_ids:
                             if line_id.on_site:
@@ -348,15 +317,12 @@ class account_analytic_account_sla_priority(models.Model):
 
     def _issue_per_stage(self):
         stage_dict = {}
-        cr = self.env.cr
-        uid = self.env.user.id
-        contract_report_dates = self._get_contract_report_dates()
-        if contract_report_dates:
-            project_issue_obj = self.pool.get('project.issue')
-            project_issues = project_issue_obj.search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',contract_report_dates[0]),('create_date','<=',contract_report_dates[1])])
+        sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
+        if sale_subscription_shared_dates:
+            project_issues = self.env['project.issue'].search([('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1])])
             total = 0
             if project_issues:
-                for issue in project_issue_obj.browse(cr, uid, project_issues):
+                for issue in project_issues:
                     if issue.stage_id:
                         user_name = issue.stage_id.name
                         if stage_dict.has_key(user_name):

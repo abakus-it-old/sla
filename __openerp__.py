@@ -1,10 +1,11 @@
-﻿{
+﻿# -*- coding: utf-8 -*-
+
+{
     'name': "AbAKUS Project SLA",
-    'version': '9.0.1.0',
+    'version': '9.0.1.1',
     'depends': [
         'project',
         'account_analytic_account_improvements',
-        'contract_report'
     ],
     'author': "Bernard DELHEZ, AbAKUS it-solutions SARL",
     'website': "http://www.abakusitsolutions.eu",
@@ -27,14 +28,14 @@ odoo 9 Updates:
 
 This module has been developed by Bernard Delhez, intern @ AbAKUS it-solutions, under the control of Valentin Thirion.""",
     'data': [
-        'view/project_sla_view.xml',
-        'view/project_sla_rule_view.xml',
-        'view/project_sla_action_view.xml',
-        'project_sla_action_data.xml',
-        'view/sale_subscription_view.xml',
-        'view/account_analytic_account_type_view.xml',
-        'view/project_issue_view.xml',
-        'project_sla_cron.xml',
+        'views/project_sla_view.xml',
+        'views/project_sla_rule_view.xml',
+        'views/project_sla_action_view.xml',
+        'views/sale_subscription_view.xml',
+        'views/account_analytic_account_type_view.xml',
+        'views/project_issue_view.xml',
+        'data/project_sla_action_data.xml',
+        'data/project_sla_cron.xml',
         'security/ir.model.access.csv',
     ],
 }

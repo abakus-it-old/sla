@@ -1,4 +1,6 @@
-﻿from openerp import models, fields, api
+﻿# -*- coding: utf-8 -*-
+
+from openerp import models, fields, api
 
 class project_sla(models.Model):
     _name = 'project.sla'

@@ -1,4 +1,6 @@
-﻿from openerp import models, fields, api
+﻿# -*- coding: utf-8 -*-
+
+from openerp import models, fields
 
 class project_sla_rule(models.Model):
     _name = 'project.sla.rule'
@@ -13,8 +15,6 @@ class project_sla_rule(models.Model):
                 ('Open', 'Open'),
                 ('Pending Supplier feedback', 'Pending Supplier feedback'),
                 ('Pending Customer feedback', 'Pending Customer feedback'),
-                #('Closed', 'Closed'),
-                #('Cancelled', 'Cancelled')
                ]
     
     name = fields.Char(string="Name")
