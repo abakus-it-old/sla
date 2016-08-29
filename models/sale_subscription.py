@@ -277,7 +277,7 @@ class sale_subscription_sla_priority(models.Model):
         type_dict['ticketSum'] = 0
         sale_subscription_shared_dates = self._get_sale_subscription_shared_dates()
         if sale_subscription_shared_dates:
-            project_issues = self.env['project.issue'].search(cr, uid, [('analytic_account_id', '=', self.analytic_account_id.id),('create_date','>=',sale_subscription_shared_dates[0]),('create_date','<=',sale_subscription_shared_dates[1])])
+            project_issues = self.env['project.issue'].search([['analytic_account_id', '=', self.analytic_account_id.id],['create_date','>=',sale_subscription_shared_dates[0]],['create_date','<=',sale_subscription_shared_dates[1]]])
             total = 0
             if project_issues:
                 for issue in project_issues:
