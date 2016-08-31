@@ -2,7 +2,7 @@
 
 {
     'name': "AbAKUS Project SLA",
-    'version': '9.0.1.1',
+    'version': '9.0.1.2',
     'depends': [
         'project',
         'account_analytic_account_improvements',
