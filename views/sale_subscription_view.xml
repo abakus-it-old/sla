@@ -10,7 +10,7 @@
                     <field name="sla_bool" attrs="{'invisible': [('contract_type', 'NOT LIKE', 'BL')]}"/>
                 </xpath>
                 <xpath expr="//group[@id='invoicing_support_contract']" position="after">
-                    <group string="SLA stats" id="sla" attrs="{'invisible':['|', ('sla_bool','=', False), ('contract_type', 'NOT LIKE', 'BL')]}">
+                    <group string="SLA stats" id="sla" attrs="{'invisible':[('sla_bool','=', False)]}">
                         <field name="number_successful_issue"/>
                         <field name="number_failed_issue"/>
                         <field name="number_closed_issue"/>
