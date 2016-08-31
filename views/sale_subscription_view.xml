@@ -7,10 +7,10 @@
             <field name="inherit_id" ref="account_analytic_account_improvements.sale_subscription_contract_improvements"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='contract_type_product_name']" position="after">
-                    <field name="sla_bool"/>
+                    <field name="sla_bool" attrs="{'invisible': [('contract_type', 'NOT LIKE', 'BL')]}"/>
                 </xpath>
                 <xpath expr="//group[@id='invoicing_support_contract']" position="after">
-                    <group string="SLA stats" id="sla" attrs="{'invisible':[('sla_bool','=', False)]}">
+                    <group string="SLA stats" id="sla" attrs="{'invisible':['|', ('sla_bool','=', False), ('contract_type', 'NOT LIKE', 'BL')]}">
                         <field name="number_successful_issue"/>
                         <field name="number_failed_issue"/>
                         <field name="number_closed_issue"/>
