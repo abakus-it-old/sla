@@ -26,7 +26,7 @@ class project_issue_sla(models.Model):
                 #return Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
                 cursor_dayofweek = cursor_date.strftime("%w")
                 #dayofweek selection: Monday 0, Tuesday 1, Wednesday 2, Thursday 3, Friday 4, Saturday 5, Sunday 6
-                resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=',resource_calendars.i$
+                resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=',resource_calendars.id)])
                 if not resource_calendar_attendance:
                     if cursor_date.date() < now_date.date():
                         cursor_date += timedelta(days=1)
