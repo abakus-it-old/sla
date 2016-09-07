@@ -3,6 +3,8 @@
 from openerp import models, fields, api
 from datetime import date, datetime, timedelta
 from pytz import timezone
+import logging
+_logger = logging.getLogger(__name__)
 
 class project_issue_sla(models.Model):
     _inherit = 'project.issue'
@@ -26,7 +28,8 @@ class project_issue_sla(models.Model):
                 #return Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
                 cursor_dayofweek = cursor_date.strftime("%w")
                 #dayofweek selection: Monday 0, Tuesday 1, Wednesday 2, Thursday 3, Friday 4, Saturday 5, Sunday 6
-                resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=',resource_calendars.id)])
+                resource_calendars = resource_calendars[0]
+                resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=', resource_calendars.id),('dayofweek','=',dayofweek_dict[str(cursor_dayofweek)])])
                 if not resource_calendar_attendance:
                     if cursor_date.date() < now_date.date():
                         cursor_date += timedelta(days=1)
@@ -34,6 +37,7 @@ class project_issue_sla(models.Model):
                     else:
                         break
                 else:
+                    resource_calendar_attendance = resource_calendar_attendance[0]
                     working_hour_dayofweek = self.env['resource.calendar.attendance'].browse(resource_calendar_attendance.id)
                     hour_from = working_hour_dayofweek.hour_from
                     hour_to = working_hour_dayofweek.hour_to
@@ -70,13 +74,14 @@ class project_issue_sla(models.Model):
     
     @api.model
     def check_date_in_working_time(self, check_date):
-        resource_calendars = self.env['resource.calendar'].search([('name','ilike','sla')], limit=1)
+        resource_calendars = self.env['resource.calendar'].search([('name','ilike','sla')])
         if resource_calendars:
             dayofweek_dict = {'0': '6', '1': '0', '2': '1', '3': '2', '4': '3', '5': '4', '6': '5'}
             #return Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
             cursor_dayofweek = check_date.strftime("%w")
             #dayofweek selection: Monday 0, Tuesday 1, Wednesday 2, Thursday 3, Friday 4, Saturday 5, Sunday 6
-            resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=',resource_calendars.id),('dayofweek','=',dayofweek_dict[str(cursor_dayofweek)])], limit=1)
+            resource_calendars = resource_calendars[0]
+            resource_calendar_attendance = self.env['resource.calendar.attendance'].search([('calendar_id','=', resource_calendars.id),('dayofweek','=',dayofweek_dict[str(cursor_dayofweek)])])
             if not resource_calendar_attendance:
                 return False
             else:
